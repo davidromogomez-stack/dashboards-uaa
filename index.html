@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tableros del equipo UAA · Datatón INEGI 2026</title>
+<style>
+:root{--navy:#001F60;--red:#D50037;--yel:#FFA400;--ink2:#3D4A6B;--mute:#5A6480;--line:#E3E6EE;--bg:#F6F7FB}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--navy);font-family:"Segoe UI",Inter,"Helvetica Neue",Arial,sans-serif}
+body:before{content:"";display:block;height:10px;background:linear-gradient(90deg,var(--navy) 0 60%,var(--red) 60% 85%,var(--yel) 85%)}
+.wrap{max-width:1040px;margin:0 auto;padding:32px 22px 40px}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.kicker{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.kicker span:first-child{background:var(--red);color:#fff;border-radius:7px;padding:3px 10px;letter-spacing:.04em}
+h1{font-size:clamp(32px,6vw,48px);line-height:1.05;font-weight:800;letter-spacing:-.02em;margin:12px 0 8px}
+h1 em{font-style:normal;color:var(--red)}
+.sub{font-size:17px;color:var(--ink2);margin:0}
+.logo{background:#fff;border-radius:16px;padding:10px 16px;box-shadow:0 6px 20px rgba(0,31,96,.12)}
+.logo img{display:block;height:64px;width:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;margin-top:30px}
+a.card{display:flex;flex-direction:column;gap:12px;text-decoration:none;color:inherit;background:#fff;border-radius:22px;padding:24px 26px;box-shadow:0 2px 0 var(--line),0 10px 30px rgba(0,31,96,.08);border-top:8px solid var(--red);transition:transform .15s}
+a.card:hover{transform:translateY(-3px)}
+a.card.y{border-top-color:var(--yel)}
+.n{width:40px;height:40px;border-radius:12px;background:var(--red);color:#fff;font-weight:800;font-size:20px;display:grid;place-items:center}
+.y .n{background:var(--yel);color:var(--navy)}
+h2{margin:0;font-size:24px;line-height:1.15;font-weight:800}
+.card p{margin:0;color:var(--ink2);font-size:15.5px;line-height:1.45}
+.btn{margin-top:6px;align-self:flex-start;background:var(--navy);color:#fff;font-weight:800;font-size:15px;padding:12px 18px;border-radius:12px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips span{background:#EEF1F7;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:700}
+footer{margin-top:30px;font-size:13px;color:var(--mute)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <div class="kicker"><span>Datatón INEGI 2026</span><span>Reto ANTAD · Consumo electrónico</span></div>
+      <h1>Tableros del <em>equipo UAA</em></h1>
+      <p class="sub">Los datos detrás de nuestras propuestas. Funcionan en computadora y en celular.</p>
+    </div>
+    <div class="logo"><img src="logo_uaa.png" alt="Universidad Autónoma de Aguascalientes"></div>
+  </div>
+  <div class="cards">
+    <a class="card" href="consumo.html">
+      <div class="n">1</div>
+      <h2>Consumo electrónico en México</h2>
+      <p>Quién compra en línea, qué compra, qué lo frena y cómo cambia por estado.</p>
+      <div class="chips"><span>ENDUTIH 2020–2025</span><span>ENIGH 2020–2024</span></div>
+      <span class="btn">Abrir tablero →</span>
+    </a>
+    <a class="card y" href="denue.html">
+      <div class="n">2</div>
+      <h2>Dónde están las tiendas ANTAD</h2>
+      <p>40,203 establecimientos de 77 cadenas, por estado, municipio y formato.</p>
+      <div class="chips"><span>DENUE · INEGI</span><span>Cadenas asociadas a ANTAD</span></div>
+      <span class="btn">Abrir tablero →</span>
+    </a>
+  </div>
+  <footer><b>Universidad Autónoma de Aguascalientes</b> · Datatón INEGI 2026 · Fuente: INEGI, microdatos ENDUTIH, ENIGH y DENUE.</footer>
+</div>
+</body>
+</html>
