@@ -139,6 +139,46 @@ table.tbl{border-collapse:collapse;width:100%;font-size:13.5px}
 .pie-pag{padding:0 40px 30px;color:var(--mute);font-size:12.5px}
 .cargando{position:fixed;inset:0;z-index:500;background:var(--bg);display:grid;place-items:center;color:var(--navy);font-weight:800;font-size:20px}
 .cargando small{display:block;color:var(--mute);font-weight:600;font-size:14px;margin-top:6px;text-align:center}
+
+/* ==========================================================================
+   Celular (pantallas angostas)
+   ========================================================================== */
+@media (max-width: 760px){
+  html,body{font-size:14px}
+  body:before{height:6px}
+  .hdr{flex-direction:column-reverse;align-items:flex-start;gap:12px;padding:20px 14px 12px}
+  .logo{padding:6px 10px;border-radius:12px;box-shadow:0 3px 10px rgba(0,31,96,.12)}
+  .logo img{height:38px}
+  .kicker{font-size:10.5px;letter-spacing:.1em;gap:8px}
+  .hdr h1{font-size:29px;margin:8px 0 6px}
+  .hdr .sub{font-size:14px}
+  .tabs{top:6px;margin:0 8px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;border-radius:16px;padding:5px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{white-space:nowrap;flex:none;font-size:13px;padding:8px 12px}
+  .layout{padding:12px 8px 30px;gap:12px}
+  .filtros{position:static;max-height:none;padding:12px 14px;border-radius:14px}
+  .filtros>h3{margin:0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--navy);letter-spacing:.12em}
+  .filtros>h3:after{content:"Mostrar ▾";letter-spacing:0;text-transform:none;font-size:13px;color:var(--red);font-weight:800}
+  .filtros.abierto>h3{margin-bottom:12px}
+  .filtros.abierto>h3:after{content:"Ocultar ▴"}
+  .filtros:not(.abierto)>*:not(h3){display:none}
+  .ptitle h2{font-size:23px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .kpi{padding:12px 14px;border-radius:14px}
+  .kpi b{font-size:24px}
+  .kpi span{font-size:12px}
+  .grid{gap:12px;margin-bottom:12px}
+  .card{padding:12px 12px 10px;border-radius:14px}
+  .card .full{display:none}
+  .ch-t{font-size:14.5px}
+  .ch-s{font-size:12px}
+  .ctrls{padding:10px 12px;gap:10px}
+  .ctrls .f{min-width:0;flex:1 1 100%}
+  .note{font-size:13px;padding:9px 12px}
+  .tbl{font-size:12px}
+  .tbl-bar input{min-width:0;flex:1 1 160px}
+  .pie-pag{padding:0 12px 24px}
+}
 </style>
 </head>
 <body>
@@ -204,6 +244,14 @@ function ticks(min, max, n = 5) {
   const out = []; for (let v = Math.ceil(min / paso) * paso; v <= max + 1e-9; v += paso) out.push(+v.toFixed(10));
   return out;
 }
+// etiquetas del eje x: horizontales si caben; inclinadas si no (pantallas angostas)
+function ejeX(cats, bw, size = 12) {
+  const inclina = cats.some(c => String(c).split(" ").some(w => ancho(w, size, 600) > bw - 4) || partir(c, bw - 4, size).length > 3);
+  const largo = Math.max(...cats.map(c => ancho(c, size, 600)));
+  return { inclina, bot: inclina ? Math.min(120, 22 + largo * 0.72) : 46,
+    pinta: (cx, y, c) => inclina ? `<text transform="translate(${cx + 4} ${y - 8}) rotate(-45)" text-anchor="end" font-size="${size}" font-weight="600" fill="${COL.TINTA2}">${esc(c)}</text>`
+      : textoMulti(cx, y, partir(c, bw - 4, size), { anchor: "middle", size, peso: 600 }) };
+}
 const tip = (html) => `data-tip="${esc(html)}"`;
 
 // ---- contenedor: título, subtítulo y svg
@@ -255,7 +303,7 @@ function columnas(el, rows, o = {}) {
   rows = (rows || []).filter(r => r && isFinite(r.pct));
   if (!rows.length) return vacio(el, o.vacio, o.alto || 300);
   const W = lienzo(el, o), H = o.alto || 330, dec = o.dec ?? 1, pre = o.pre || "", uni = o.uni ?? " %", color = o.color || COL.AZUL;
-  const n = rows.length, top = 26, bot = 46, x0 = 8, x1 = W - 8;
+  const n = rows.length, top = 26, x0 = 8, x1 = W - 8, ex = ejeX(rows.map(d => d.k), (x1 - x0) / n), bot = ex.bot;
   const mx = Math.max(...rows.map(d => isFinite(d.ls) ? d.ls : d.pct), o.ref || 0) * 1.12 || 1;
   const sy = v => top + (H - top - bot) * (1 - Math.max(0, v) / mx);
   const bw = (x1 - x0) / n, cw = Math.min(70, bw * 0.66);
@@ -268,7 +316,7 @@ function columnas(el, rows, o = {}) {
     const hayIC = isFinite(d.li) && isFinite(d.ls) && d.ls !== d.li;
     if (hayIC) s += `<line x1="${cx}" x2="${cx}" y1="${sy(d.li)}" y2="${sy(d.ls)}" stroke="${COL.IC}" stroke-width="2"/>`;
     s += texto(cx, sy(hayIC ? d.ls : d.pct) - 7, pre + fmt(d.pct, dec), { anchor: "middle", size: 13, peso: 800, fill: COL.TINTA });
-    s += textoMulti(cx, H - bot + 18, partir(d.k, Math.max(60, bw - 6), 12), { anchor: "middle", size: 12, fill: COL.TINTA2, peso: 600 });
+    s += ex.pinta(cx, H - bot + 18, d.k);
   });
   if (o.ref != null && isFinite(o.ref)) {
     s += `<line x1="${x0}" x2="${x1}" y1="${sy(o.ref)}" y2="${sy(o.ref)}" stroke="${COL.TENUE}" stroke-dasharray="5 4" stroke-width="1.3"/>`;
@@ -297,7 +345,7 @@ function agrupadas(el, rows, o = {}) {
     s += `<line x1="${labW}" x2="${labW}" y1="0" y2="${H}" stroke="${COL.GRIS_UAA}" stroke-width="1.5"/>`;
     return poner(el, W, H, s, leyenda(ser, cols));
   }
-  const H = o.alto || 330, top = 20, bot = 46, x0 = 8, x1 = W - 8, bw = (x1 - x0) / cats.length;
+  const top = 20, x0 = 8, x1 = W - 8, bw = (x1 - x0) / cats.length, ex = ejeX(cats, bw), bot = ex.bot, H = (o.alto || 330) + bot - 46;
   const sy = v => top + (H - top - bot) * (1 - v / mx), cw = Math.min(34, bw * 0.8 / ser.length);
   s += `<line x1="${x0}" x2="${x1}" y1="${sy(0)}" y2="${sy(0)}" stroke="${COL.GRIS_UAA}" stroke-width="1.5"/>`;
   cats.forEach((c, i) => {
@@ -305,7 +353,7 @@ function agrupadas(el, rows, o = {}) {
     ser.forEach((se, j) => { const d = val[c + "|" + se]; if (!d) return; const x = g0 + j * cw;
       s += `<rect x="${x + 1}" y="${sy(d.pct)}" width="${cw - 2}" height="${sy(0) - sy(d.pct)}" rx="3" fill="${cols[j % cols.length]}" ${tip(`<b>${esc(c)}</b><br>${esc(se)}: ${fmt(d.pct, dec)}${suf}`)}/>`;
       if (o.etiquetas !== false && cw >= 16) s += texto(x + cw / 2, sy(d.pct) - 5, fmt(d.pct, o.decEtq ?? 0), { anchor: "middle", size: 11, fill: COL.TINTA, peso: 700 }); });
-    s += textoMulti(cx, H - bot + 18, partir(c, Math.max(60, bw - 4), 12), { anchor: "middle", size: 12, peso: 600 });
+    s += ex.pinta(cx, H - bot + 18, c);
   });
   poner(el, W, H, s, leyenda(ser, cols));
 }
@@ -365,17 +413,18 @@ function lineas(el, rows, o = {}) {
 /* ---------- embudo ---------- */
 function embudo(el, rows, o = {}) {
   if (!rows || !rows.length) return vacio(el);
-  const W = lienzo(el, o), rowH = 52, H = rows.length * rowH + 6, labW = Math.min(210, W * 0.3), millW = 140;
-  const cx = labW + (W - labW - millW) / 2, maxW = W - labW - millW - 10;
+  const W = lienzo(el, o), rowH = 52, H = rows.length * rowH + 6, angosto = W < 560, labW = Math.min(210, W * (angosto ? 0.28 : 0.3)), millW = angosto ? 0 : 140;
+  const cx0 = labW + (W - labW - millW) / 2, maxW = W - labW - millW - 10;
   let s = "";
   rows.forEach((d, i) => {
     const y = i * rowH + 4, w = Math.max(40, maxW * d.pct / 100), t = 0.45 + 0.55 * d.pct / 100;
-    s += textoMulti(labW - 12, y + rowH / 2 - 2, partir(d.paso, labW - 14, 13.5, 800), { anchor: "end", size: 13.5, peso: 800, fill: COL.TINTA });
-    s += `<rect x="${cx - w / 2}" y="${y}" width="${w}" height="${rowH - 10}" rx="10" fill="${rampa(t)}" ${tip(`<b>${esc(d.paso)}</b><br>${fmt(d.pct)} % · ${fmt(d.mill)} millones`)}/>`;
-    const et = fmt(d.pct) + " %", cabe = ancho(et, 16, 800) + 18 < w;
-    s += cabe ? texto(cx, y + (rowH - 10) / 2 + 1, et, { anchor: "middle", base: "middle", size: 16, peso: 800, fill: "#fff" })
-              : texto(cx + w / 2 + 8, y + (rowH - 10) / 2 + 1, et, { base: "middle", size: 15, peso: 800, fill: COL.TINTA });
-    s += texto(W - millW + 6, y + (rowH - 10) / 2 + 1, fmt(d.mill) + " millones", { base: "middle", size: 13, fill: COL.TINTA2, peso: 600 });
+    const xb = angosto ? labW : cx0 - w / 2, cx = xb + w / 2, fs = angosto ? 14 : 16;
+    s += textoMulti(labW - 12, y + rowH / 2 - 2, partir(d.paso, labW - 14, angosto ? 12.5 : 13.5, 800), { anchor: "end", size: angosto ? 12.5 : 13.5, peso: 800, fill: COL.TINTA });
+    s += `<rect x="${xb}" y="${y}" width="${w}" height="${rowH - 10}" rx="10" fill="${rampa(t)}" ${tip(`<b>${esc(d.paso)}</b><br>${fmt(d.pct)} % · ${fmt(d.mill)} millones`)}/>`;
+    const et = fmt(d.pct) + " %" + (angosto ? ` · ${fmt(d.mill)} M` : ""), cabe = ancho(et, fs, 800) + 18 < w;
+    s += cabe ? texto(cx, y + (rowH - 10) / 2 + 1, et, { anchor: "middle", base: "middle", size: fs, peso: 800, fill: "#fff" })
+              : texto(xb + w + 8, y + (rowH - 10) / 2 + 1, et, { base: "middle", size: fs - 1, peso: 800, fill: COL.TINTA });
+    if (!angosto) s += texto(W - millW + 6, y + (rowH - 10) / 2 + 1, fmt(d.mill) + " millones", { base: "middle", size: 13, fill: COL.TINTA2, peso: 600 });
   });
   poner(el, W, H, s);
 }
@@ -480,7 +529,7 @@ function apiladas(el, rows, o = {}) {
   if (!rows.length) return vacio(el, o.vacio, o.alto || 300);
   const W = lienzo(el, o), H = o.alto || 330, cats = o.cats || [...new Set(rows.map(r => r.k))], ser = o.series || [...new Set(rows.map(r => r.s))];
   const cols = o.colores || COL.SERIE, tot = {}; rows.forEach(r => tot[r.k] = (tot[r.k] || 0) + r.v);
-  const mx = Math.max(...Object.values(tot)) * 1.08 || 1, x0 = 40, x1 = W - 8, top = 10, bot = 40, bw = (x1 - x0) / cats.length, cw = Math.min(64, bw * 0.66);
+  const mx = Math.max(...Object.values(tot)) * 1.08 || 1, x0 = 40, x1 = W - 8, top = 10, bw = (x1 - x0) / cats.length, cw = Math.min(64, bw * 0.66), ex = ejeX(cats, bw), bot = ex.bot - 6;
   const sy = v => top + (H - top - bot) * (1 - v / mx);
   let s = "";
   ticks(0, mx, 5).forEach(t => s += `<line x1="${x0}" x2="${x1}" y1="${sy(t)}" y2="${sy(t)}" stroke="${COL.REJA}"/>` + texto(x0 - 8, sy(t), fmt(t, t % 1 ? 1 : 0), { anchor: "end", base: "middle", size: 11.5, fill: COL.TENUE }));
@@ -489,7 +538,7 @@ function apiladas(el, rows, o = {}) {
     ser.forEach((se, j) => { const d = rows.find(r => r.k === c && r.s === se); if (!d) return;
       s += `<rect x="${cx - cw / 2}" y="${sy(acc + d.v)}" width="${cw}" height="${sy(acc) - sy(acc + d.v)}" fill="${cols[j % cols.length]}" stroke="#fff" stroke-width="1.2" ${tip(`<b>${esc(c)}</b><br>${esc(se)}: ${fmt(d.v, o.dec ?? 1)}${o.suf || ""}`)}/>`; acc += d.v; });
     s += texto(cx, sy(acc) - 6, fmt(acc, o.dec ?? 1), { anchor: "middle", size: 12, peso: 800, fill: COL.TINTA });
-    s += textoMulti(cx, H - bot + 18, partir(c, bw - 4, 12), { anchor: "middle", size: 12, peso: 600 });
+    s += ex.pinta(cx, H - bot + 18, c);
   });
   if (o.yl) s += `<text transform="translate(11 ${(top + H - bot) / 2}) rotate(-90)" text-anchor="middle" font-size="12" fill="${COL.TENUE}">${esc(o.yl)}</text>`;
   poner(el, W, H, s, leyenda(ser, cols));
@@ -575,6 +624,8 @@ function csv(nombre, cols, filas) {
     t.style.top = (e.clientY + h + 20 > window.innerHeight ? e.clientY - h - 12 : e.clientY + 16) + "px";
   });
   const velo = document.createElement("div"); velo.className = "velo"; document.body.appendChild(velo);
+  // en celular, el título "Filtros" abre y cierra el panel de filtros
+  document.addEventListener("click", e => { const h = e.target.closest && e.target.closest(".filtros > h3"); if (h) h.parentElement.classList.toggle("abierto"); });
   velo.onclick = () => { const m = document.querySelector(".card.max"); if (m) m.querySelector(".full").click(); };
 })();
 const C = { barras, columnas, agrupadas, calor, lineas, embudo, mosaico, dispersion, mancuerna, piramide, apiladas, facetas, tabla, vacio, fmt, COL, rampa, csv };
